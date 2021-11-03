@@ -1,3 +1,9 @@
+# data folders
+Data Twitter/Train/
+Data Twitter/Test/
+Data Twitter/Dev/
+Data Instagram/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
