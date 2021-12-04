@@ -78,11 +78,12 @@ def inverted_index(id,text,y):
 def inverted_index_letter(id, text, y):
     # Appending to file
     ind = 0
-    for word in text:
-        if not word in ['/']:
-            with open('./letterdb/' + word + ".txt", 'a') as file1:
+    for letter in text:
+        if not letter in ['/']:
+            with open('./letterdb/' + letter + ".txt", 'a') as file1:
                 ref = str(id) + ',' + str(ind) + ',' + str(y) + '\n'
                 file1.write(ref)
+            ind += 1
 
 def print_hi(name,argv):
     # Use a breakpoint in the code line below to debug your script.
