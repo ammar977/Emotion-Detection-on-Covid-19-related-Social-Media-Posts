@@ -1,0 +1,1 @@
+This directory contains the files used for the bonus (East-Asian face recognition) section of the project.
