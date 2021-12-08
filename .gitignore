@@ -10,9 +10,13 @@ Data Twitter/Test/
 Data Twitter/Dev/
 Data Twitter/
 Data Instagram/
+letterdb/
+worddb/
 
 # Data Files
 Labeled_instagram_posts_related_to_covid.xlsx
+
+
 
 
 # Byte-compiled / optimized / DLL files

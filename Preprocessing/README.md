@@ -28,6 +28,9 @@ Project for CS 640 -  Intro to AI - Fall 21 - Boston University
 #### The \ character escapes the space in the directory name. 
 ###### You can also use quotes around the file path/name.
 `python3 ./Preprocessing/indexer.py ./Data\ Twitter/Train/joy-ratings-0to1.train.txt `
+
 `python3 ./Preprocessing/indexer.py ./Data\ Twitter/Train/sadness-ratings-0to1.train.txt `
+
 `python3 ./Preprocessing/indexer.py ./Data\ Twitter/Train/fear-ratings-0to1.train.txt `
+
 `python3 ./Preprocessing/indexer.py ./Data\ Twitter/Train/anger-ratings-0to1.train.txt `
