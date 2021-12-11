@@ -11,6 +11,6 @@ The two continuums:
 joy and sadness 
 fear and anger 
 
-The difficulty in separating the words along these two boundardies was difficult and by taking a sample of results did not produce a good separation in the data.
+The difficulty in separating the words along these two boundaries was difficult and by taking a sample of results did not produce a good separation in the data.
 
 ##  pla.py and pla2.py are the two Perceptron NN created for these experiments
