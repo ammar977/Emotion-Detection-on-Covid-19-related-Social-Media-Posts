@@ -1,88 +1,111 @@
-import copy
-import math
-
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import sys
-import numpy as np
+import copy
+import matplotlib.lines as mlines
+
+# from sklearn.metrics import accuracy_score
+def visualize_scatter(df, feature1=0, feature2=1, target=2, weights=[1, 1, 1],
+                      title=''):
+    """
+        Scatter plot feature1 vs feature2.
+         +/- binary labels.
+          - weights: [w1, w2, b]
+    """
+
+    # Draw color-coded scatter plot
+    colors = pd.Series(['r' if label > 0 else 'b' for label in df[target]])
+    ax = df.plot(x=feature1, y=feature2,kind='scatter', label=target, c=colors)
+    ax.legend(target)
+    # Get scatter plot boundaries to define line boundaries
+    xmin, xmax = ax.get_xlim()
+
+    # Compute and draw line. ax + by + c = 0  =>  y = -a/b*x - c/b
+    a = weights[0]
+    b = weights[1]
+    c = weights[2]
+
+    def y(x):
+        return (-a/b)*x - c/b
+
+    line_start = (xmin,xmax )
+    line_end = (y(xmin), y(xmax))
+    line = mlines.Line2D(line_start, line_end, color='crimson')
+    ax.add_line(line)
 
 
-#
-# Perceptron implementation
-#
-class CustomPerceptron(object):
+    if title == '':
+        title = 'Scatter of feature %s vs %s' %(str(feature1), str(feature2))
+    ax.set_title(title)
 
-    def __init__(self, n_iterations=100, random_state=1, learning_rate=0.01):
-        self.n_iterations = n_iterations
-        self.random_state = random_state
-        self.learning_rate = learning_rate
-        self.coef_values = []
-        self.globalerr =0
+    plt.show()
 
-    '''
-    Stochastic Gradient Descent
+def step_funct(y):
+    return np.heaviside(y,0)
 
-    1. Weights are updated based on each training examples.
-    2. Learning of weights can continue for multiple iterations
-    3. Learning rate needs to be defined
-    '''
-    def fit(self, X, y):
-        rgen = np.random.RandomState(self.random_state)
-        self.coef_ = rgen.normal(loc=0.0, scale=0.01, size=1 + X.shape[1])
-        self.coef_values = []
-        for i in range(self.n_iterations):
-            self.globalerr = 0
-            for xi, expected_value in zip(X, y):
-                predicted_value = self.predict(xi)
-                self.coef_[1:] = self.coef_[1:] + self.learning_rate * (expected_value - predicted_value) * xi
-                self.coef_[0] = self.coef_[0] + self.learning_rate * (expected_value - predicted_value) * 1
-                self.globalerr += (expected_value - predicted_value)**2
-
-            if (i % 4 == 0):
-                self.coef_values.append(copy.deepcopy(self.coef_))
-                print(f"Iteration {i} : {self.globalerr} , {len(X)} RMSE = { math.sqrt(self.globalerr/len(X))}")
-
-        print(f"\nDecision boundary (line) equation: {self.coef_[0]}*x + {self.coef_[1]}*y + {self.coef_[2]} = 0\n")
+def weightInitialization(n_features):
+    w = np.zeros((1, n_features))
+    b = 0
+    return w, b
 
 
-    '''
-    Net Input is sum of weighted input signals
-    '''
+def sigmoid_activation(result):
+    final_result = 1 / (1 + np.exp(-result))
+    return final_result
 
-    def net_input(self, X):
-        weighted_sum = np.dot(X, self.coef_[1:]) + self.coef_[0]
-        return weighted_sum
+def perceptron(X, y, lr, epochs):
+    # X --> Inputs.
+    # y --> labels/target.
+    # lr --> learning rate.
+    # epochs --> Number of iterations.
 
-    '''
-    Activation function is fed the net input and the unit step function
-    is executed to determine the output.
-    '''
+    # m-> number of training examples
+    # n-> number of features
+    m, n = X.shape
 
-    def activation_function(self, X):
-        weighted_sum = self.net_input(X)
-        return np.where(weighted_sum >= 0.0, 1, 0)
+    # Initializing parapeters(theta) to zeros.
+    # +1 in n+1 for the bias term.
+    theta = np.zeros((n + 1, 1))
 
-    '''
-    Prediction is made on the basis of output of activation function
-    '''
+    # Empty list to store how many examples were
+    # misclassified at every iteration.
+    n_miss_list = []
+    cost_list = []
 
-    def predict(self, X):
-        return self.activation_function(X)
+    # Training.
+    for epoch in range(epochs):
 
-    '''
-    Model score is calculated based on comparison of
-    expected value and predicted value
-    '''
+        # variable to store #misclassified.
+        n_miss = 0
+        cost = 0
 
-    def score(self, X, y):
-        misclassified_data_count = 0
-        for xi, target in zip(X, y):
-            output = self.predict(xi)
-            if (target != output):
-                misclassified_data_count += 1
-        total_data_count = len(X)
-        self.score_ = (total_data_count - misclassified_data_count) / total_data_count
-        return self.score_
+        # looping for every example.
+        for idx, x_i in enumerate(X):
+
+            # Insering 1 for bias, X0 = 1.
+            x_i = np.insert(x_i, 0, 1).reshape(-1, 1)
+
+            # Calculating prediction/hypothesis.
+            y_hat = sigmoid_activation(np.dot(x_i.T, theta))
+
+            # Updating if the example is misclassified.
+
+            if (np.squeeze(y_hat) - y[idx]) != 0:
+                theta += lr * ((y[idx] - y_hat) * x_i)
+
+                # Incrementing by 1.
+                n_miss += 1
+                cost = -1 * np.mean((y[idx] * np.log(y_hat)) +
+                                    ((1 - y[idx]) * (np.log(1 - y_hat))))
+
+        # Appending number of misclassified examples
+        # at every iteration.
+        n_miss_list.append(n_miss)
+        cost_list.append(cost)
+
+
+    return theta, n_miss_list, cost_list
 
 
 
@@ -90,29 +113,25 @@ def main(argv):
     #
     # Load the data set
     #
-    datafile = pd.read_csv(argv[0], header=None, names=["feature1", "feature2", "y"])
+    datafile = pd.read_csv(argv[0], header=None, names=['feature1', 'feature2', 'y'])
+    datafile['y'] = step_funct(datafile['y'])
     print(datafile, datafile.shape)
     outfile = argv[1]
     open(outfile,"w")
-    df = np.array(datafile)
-    X, y = df[:, 0:2:], df[:, 2:3:]
-    X_train, y_train = X[0:11,0:2], y[0:11]
-    X_test, y_test = X[10:,0:2], y[10:]
 
-    # Instantiate CustomPerceptron
-    #
-    prcptrn = CustomPerceptron(n_iterations=80, random_state=1, learning_rate=0.00001)
-    #
-    # Fit the model
-    #
-    prcptrn.fit(X_train, y_train)
-    print(type(prcptrn.coef_))
-    pd.DataFrame(prcptrn.coef_values).to_csv(outfile, index=False, header=None)
-    print(prcptrn.coef_, np.array(prcptrn.coef_values))
-    #
-    # Score the model
-    #
-    print(prcptrn.score(X_test, y_test), prcptrn.score(X_train, y_train))
+    # Get number of features
+    n_features = datafile.shape[1]
+    print('Number of Features', n_features)
+
+    lr = 0.06
+    epochs=8000
+    theta, n_miss_list, cost_list = perceptron(np.array(datafile[['feature1','feature2']]), np.array(datafile['y']), lr, epochs)
+
+    print(f'theta {theta}')
+    print(f'n misses {n_miss_list}')
+    print(f'cost list {cost_list}')
+    visualize_scatter(datafile, feature1='feature1', feature2='feature2', target='y', weights=[theta[1],theta[2],theta[0]],
+                      title='Try It')
 
 
 if __name__ == "__main__":
