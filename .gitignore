@@ -12,7 +12,7 @@ Data Twitter/
 Data Instagram/
 letterdb/
 worddb/
-
+Model\ Training/altsaveBert.ckpt
 # Data Files
 Labeled_instagram_posts_related_to_covid.xlsx
 
